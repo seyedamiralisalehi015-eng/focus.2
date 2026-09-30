@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ff3b30">
+<title>تمرکز پرو</title>
+<style>
+  :root{ --accent:#ff3b30; --accent-soft:rgba(255,59,48,.14); --radius:16px; }
+  [data-theme="light"]{ --bg:#f5f5f7; --card:#fff; --text:#1d1d1f; --muted:#6e6e73; --border:#e5e5ea; --hover:#f0f0f2; }
+  [data-theme="dark"]{ --bg:#1c1c1e; --card:#2c2c2e; --text:#f2f2f7; --muted:#98989d; --border:#3a3a3c; --hover:#3a3a3c; }
+  [data-theme="ocean"]{ --bg:#0b1c2c; --card:#122a42; --text:#e6f1ff; --muted:#7fa8cc; --border:#1e3f5e; --hover:#1a3550; }
+  [data-theme="forest"]{ --bg:#0f1a14; --card:#17281e; --text:#e8f5ec; --muted:#8bb59c; --border:#22402e; --hover:#1e3626; }
+  [data-theme="sunset"]{ --bg:#2a1020; --card:#3a1a2c; --text:#ffe8f2; --muted:#c98aa8; --border:#4d2540; --hover:#432034; }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,sans-serif;-webkit-tap-highlight-color:transparent}
+  body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;justify-content:center;padding:20px 14px 60px;transition:background .35s,color .35s}
+  .app{width:100%;max-width:560px}
+  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:8px}
+  h1{font-size:19px;font-weight:700;letter-spacing:-.3px}
+  h1 small{color:var(--muted);font-weight:400;font-size:12px;display:block}
+  .head-actions{display:flex;gap:6px}
+  .icon-btn{background:var(--card);border:1px solid var(--border);color:var(--text);width:38px;height:38px;border-radius:11px;cursor:pointer;font-size:16px;display:grid;place-items:center;transition:.15s}
+  .icon-btn:hover{background:var(--hover)}
+  .icon-btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  nav.tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:5px;margin-bottom:14px}
+  nav.tabs button{flex:1;background:transparent;border:none;color:var(--muted);padding:9px 4px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;transition:.15s;font-family:inherit}
+  nav.tabs button.active{background:var(--accent);color:#fff}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px}
+  .view{display:none;animation:fade .25s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  /* Timer */
+  .timer-card{text-align:center;position:relative;overflow:hidden}
+  .mode-tabs{display:flex;gap:6px;justify-content:center;margin-bottom:18px;flex-wrap:wrap}
+  .mode-tabs button{background:transparent;border:1px solid var(--border);color:var(--muted);padding:7px 15px;border-radius:10px;cursor:pointer;font-size:13px;font-family:inherit;transition:.15s}
+  .mode-tabs button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .time{font-size:78px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-2px;line-height:1;margin:6px 0 4px;transition:color .3s}
+  .time.warn{color:var(--accent)}
+  .ring{position:relative;width:220px;height:220px;margin:0 auto 12px}
+  .ring svg{transform:rotate(-90deg);width:100%;height:100%}
+  .ring .bg{fill:none;stroke:var(--border);stroke-width:8}
+  .ring .fg{fill:none;stroke:var(--accent);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .4s linear,stroke .3s}
+  .ring .label{position:absolute;inset:0;display:grid;place-items:center}
+  .controls{display:flex;gap:10px;justify-content:center;margin-top:14px}
+  .controls button{padding:12px 30px;border-radius:12px;border:none;font-size:15px;cursor:pointer;font-weight:700;font-family:inherit;transition:.15s}
+  .controls button:active{transform:scale(.96)}
+  #startBtn{background:var(--accent);color:#fff;min-width:120px}
+  #resetBtn{background:transparent;color:var(--text);border:1px solid var(--border)}
+  .focus-task{margin-top:16px;padding-top:14px;border-top:1px solid var(--border);font-size:13px;color:var(--muted)}
+  .focus-task select{width:100%;margin-top:6px;padding:9px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px}
+  .stats-row{display:flex;justify-content:space-around;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+  .stats-row div{color:var(--muted);font-size:12px;text-align:center}
+  .stats-row b{color:var(--text);font-size:17px;display:block;margin-bottom:2px}
+  /* Tasks */
+  .task-form{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:10px}
+  .task-form input[type=text]{padding:12px;border:1px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);font-size:14px;outline:none;font-family:inherit;transition:.15s;grid-column:1/-1}
+  .task-form input[type=text]:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .task-form select,.task-form input[type=date]{padding:9px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-size:12px;font-family:inherit;outline:none}
+  .task-form .add-btn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:0 22px;font-size:20px;cursor:pointer;grid-row:2;grid-column:2}
+  .filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+  .filters input{flex:1;min-width:110px;padding:8px 11px;border:1px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);font-size:13px;outline:none;font-family:inherit}
+  .chip{background:transparent;border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:9px;font-size:12px;cursor:pointer;font-family:inherit;transition:.15s}
+  .chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  ul#taskList{list-style:none}
+  ul#taskList li.task{display:flex;align-items:flex-start;gap:10px;padding:12px 4px;border-bottom:1px solid var(--border);cursor:grab;transition:.15s;position:relative}
+  ul#taskList li.task:last-child{border-bottom:none}
+  ul#taskList li.task.dragging{opacity:.4}
+  ul#taskList li.task.drop-target{border-top:2px solid var(--accent)}
+  ul#taskList li.task input[type=checkbox]{width:19px;height:19px;accent-color:var(--accent);cursor:pointer;margin-top:3px;flex-shrink:0}
+  .task-body{flex:1;min-width:0}
+  .task-title{font-size:14px;line-height:1.4;word-break:break-word}
+  li.task.done .task-title{text-decoration:line-through;color:var(--muted)}
+  .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;font-size:11px}
+  .badge{padding:2px 7px;border-radius:6px;font-size:10px;font-weight:600;white-space:nowrap}
+  .pri-high{background:rgba(255,59,48,.15);color:#ff3b30}
+  .pri-med{background:rgba(255,149,0,.15);color:#ff9500}
+  .pri-low{background:rgba(52,199,89,.15);color:#34c759}
+  .due.overdue{color:#ff3b30;font-weight:700}
+  .subs{margin-top:6px;padding-right:6px;border-right:2px solid var(--border);display:none}
+  .subs.open{display:block}
+  .subs .sub{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:12px;color:var(--muted)}
+  .subs .sub input{width:14px;height:14px;accent-color:var(--accent)}
+  .subs .sub.done span{text-decoration:line-through}
+  .sub-add{display:flex;gap:4px;margin-top:5px}
+  .sub-add input{flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:7px;background:var(--bg);color:var(--text);font-size:11px;outline:none;font-family:inherit}
+  .sub-add button{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:0 10px;cursor:pointer;font-size:12px}
+  .task-actions{display:flex;gap:2px;flex-shrink:0}
+  .task-actions button{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:4px 6px;border-radius:7px;transition:.15s}
+  .task-actions button:hover{background:var(--hover);color:var(--accent)}
+  .empty{color:var(--muted);text-align:center;padding:28px 10px;font-size:13px}
+  /* Stats */
+  .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+  .stat-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center}
+  .stat-box b{display:block;font-size:24px;font-weight:800;margin-bottom:2px}
+  .stat-box span{font-size:11px;color:var(--muted)}
+  .chart{display:flex;align-items:flex-end;gap:6px;height:130px;padding:0 2px;margin-top:8px}
+  .bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end}
+  .bar{width:100%;background:var(--accent);border-radius:6px 6px 3px 3px;min-height:3px;transition:height .5s;position:relative}
+  .bar-wrap span{font-size:10px;color:var(--muted)}
+  .bar-wrap b{font-size:10px;color:var(--text)}
+  .heat{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:10px}
+  .heat i{aspect-ratio:1;border-radius:4px;background:var(--border);display:block;transition:.2s}
+  .goal-bar{height:8px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:8px}
+  .goal-bar i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .5s}
+  .cat-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px;border-bottom:1px solid var(--border)}
+  .cat-row:last-child{border-bottom:none}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-left:6px}
+  /* Settings */
+  .set-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);gap:10px;font-size:13px}
+  .set-row:last-child{border-bottom:none}
+  .set-row label{color:var(--muted);flex:1}
+  .set-row input[type=number],.set-row select{width:80px;padding:7px;border:1px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;outline:none;text-align:center}
+  .set-row input[type=range]{width:110px;accent-color:var(--accent)}
+  .switch{position:relative;width:44px;height:25px;flex-shrink:0}
+  .switch input{opacity:0;width:0;height:0}
+  .switch span{position:absolute;inset:0;background:var(--border);border-radius:99px;cursor:pointer;transition:.25s}
+  .switch span::before{content:'';position:absolute;width:19px;height:19px;border-radius:50%;background:#fff;top:3px;right:3px;transition:.25s}
+  .switch input:checked + span{background:var(--accent)}
+  .switch input:checked + span::before{transform:translateX(-19px)}
+  .themes{display:flex;gap:8px;flex-wrap:wrap}
+  .theme-dot{width:30px;height:30px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.15s}
+  .theme-dot.active{border-color:var(--text);transform:scale(1.1)}
+  textarea.notes{width:100%;min-height:80px;padding:11px;border:1px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);font-family:inherit;font-size:13px;resize:vertical;outline:none;line-height:1.7}
+  .btn{background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;transition:.15s}
+  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--border)}
+  .btn.danger{background:#ff3b30}
+  .btn:hover{opacity:.9}
+  .btn:active{transform:scale(.97)}
+  .row-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  kbd{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:2px 6px;font-size:11px;font-family:monospace;color:var(--muted)}
+  /* Focus mode */
+  body.focus header,body.focus nav.tabs,body.focus .view:not(#view-timer),body.focus .focus-task,body.focus .stats-row{display:none!important}
+  body.focus .app{max-width:100%;display:grid;place-items:center;min-height:90vh}
+  body.focus .timer-card{border:none;background:transparent;width:100%}
+  body.focus .time{font-size:clamp(70px,22vw,160px)}
+  body.focus .ring{width:clamp(220px,60vw,340px);height:clamp(220px,60vw,340px)}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:var(--bg);padding:11px 20px;border-radius:12px;font-size:13px;font-weight:600;transition:.3s;z-index:99;opacity:0;pointer-events:none}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+  @media(max-width:400px){ .time{font-size:60px} .ring{width:180px;height:180px} }
+</style>
+</head>
+<body data-theme="light">
+<div class="app">
+  <header>
+    <h1>🎯 تمرکز پرو <small id="streakLabel">۰ روز پیوسته</small></h1>
+    <div class="head-actions">
+      <button class="icon-btn" id="soundToggle" title="صدای محیط">🔇</button>
+      <button class="icon-btn" id="focusToggle" title="حالت تمرکز (F)">⛶</button>
+      <button class="icon-btn" id="themeBtn" title="تغییر تم">🌙</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button data-tab="timer" class="active">⏱ تایمر</button>
+    <button data-tab="tasks">📝 تسک‌ها</button>
+    <button data-tab="stats">📊 آمار</button>
+    <button data-tab="settings">⚙️ تنظیمات</button>
+  </nav>
+
+  <!-- ===== TIMER ===== -->
+  <section class="view active" id="view-timer">
+    <div class="card timer-card">
+      <div class="mode-tabs">
+        <button data-mode="work" class="active">کار</button>
+        <button data-mode="short">استراحت کوتاه</button>
+        <button data-mode="long">استراحت بلند</button>
+      </div>
+      <div class="ring">
+        <svg viewBox="0 0 220 220">
+          <circle class="bg" cx="110" cy="110" r="100"></circle>
+          <circle class="fg" id="ringFg" cx="110" cy="110" r="100"
+            stroke-dasharray="628.3" stroke-dashoffset="0"></circle>
+        </svg>
+        <div class="label"><div class="time" id="time">25:00</div></div>
+      </div>
+      <div class="controls">
+        <button id="startBtn">شروع</button>
+        <button id="resetBtn">ریست</button>
+      </div>
+      <div class="focus-task">
+        در حال تمرکز روی:
+        <select id="focusTaskSelect"><option value="">— هیچ تسکی —</option></select>
+      </div>
+      <div class="stats-row">
+        <div>پومودوروی امروز<b id="statPomo">۰</b></div>
+        <div>دقیقه تمرکز<b id="statMin">۰</b></div>
+        <div>تسک انجام‌شده<b id="statTasks">۰</b></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TASKS ===== -->
+  <section class="view" id="view-tasks">
+    <div class="card">
+      <div class="task-form">
+        <input type="text" id="taskInput" placeholder="یه کار جدید بنویس...">
+        <select id="taskPri">
+          <option value="low">کم</option>
+          <option value="med" selected>متوسط</option>
+          <option value="high">زیاد</option>
+        </select>
+        <select id="taskCat"></select>
+        <input type="date" id="taskDue">
+        <button class="add-btn" id="addBtn">+</button>
+      </div>
+      <div class="filters">
+        <input type="text" id="searchInput" placeholder="🔍 جستجو...">
+        <button class="chip active" data-filter="all">همه</button>
+        <button class="chip" data-filter="active">فعال</button>
+        <button class="chip" data-filter="done">انجام‌شده</button>
+        <button class="chip" id="clearDone" title="حذف انجام‌شده‌ها">🗑</button>
+      </div>
+      <ul id="taskList"></ul>
+    </div>
+  </section>
+
+  <!-- ===== STATS ===== -->
+  <section class="view" id="view-stats">
+    <div class="stat-grid">
+      <div class="stat-box"><b id="sToday">۰</b><span>پومودوروی امروز</span></div>
+      <div class="stat-box"><b id="sWeek">۰</b><span>این هفته</span></div>
+      <div class="stat-box"><b id="sMonth">۰</b><span>این ماه</span></div>
+      <div class="stat-box"><b id="sStreak">۰</b><span>روز پیوسته</span></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;font-size:13px">
+        <span>هدف امروز</span><span id="goalText">۰ / ۸</span>
+      </div>
+      <div class="goal-bar"><i id="goalFill" style="width:0%"></i></div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:600">۷ روز اخیر</div>
+      <div class="chart" id="chart7"></div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:600">۸ هفته اخیر</div>
+      <div class="heat" id="heatmap"></div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:600;margin-bottom:6px">به تفکیک دسته</div>
+      <div id="catStats"></div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">یادداشت امروز</div>
+      <textarea class="notes" id="notesArea" placeholder="امروز چطور بود؟"></textarea>
+    </div>
+  </section>
+
+  <!-- ===== SETTINGS ===== -->
+  <section class="view" id="view-settings">
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">⏱ زمان‌ها (دقیقه)</div>
+      <div class="set-row"><label>کار</label><input type="number" id="setWork" min="1" max="120"></div>
+      <div class="set-row"><label>استراحت کوتاه</label><input type="number" id="setShort" min="1" max="60"></div>
+      <div class="set-row"><label>استراحت بلند</label><input type="number" id="setLong" min="1" max="60"></div>
+      <div class="set-row"><label>استراحت بلند بعد از چند پومودورو</label><input type="number" id="setLongEvery" min="1" max="12"></div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">🔁 خودکارسازی</div>
+      <div class="set-row"><label>شروع خودکار استراحت</label>
+        <div class="switch"><input type="checkbox" id="setAutoBreak"><span></span></div></div>
+      <div class="set-row"><label>شروع خودکار پومودوروی بعدی</label>
+        <div class="switch"><input type="checkbox" id="setAutoNext"><span></span></div></div>
+      <div class="set-row"><label>اعلان مرورگر</label>
+        <div class="switch"><input type="checkbox" id="setNotify"><span></span></div></div>
+      <div class="set-row"><label>روشن نگه داشتن صفحه</label>
+        <div class="switch"><input type="checkbox" id="setWake"><span></span></div></div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">🔊 صدا</div>
+      <div class="set-row"><label>صدای هشدار</label>
+        <select id="setSound">
+          <option value="beep">بیپ</option>
+          <option value="chime">زنگ</option>
+          <option value="bell">ناقوس</option>
+          <option value="none">بدون صدا</option>
+        </select></div>
+      <div class="set-row"><label>بلندی صدا</label><input type="range" id="setVolume" min="0" max="1" step="0.05"></div>
+      <div class="set-row"><label>صدای محیط (نویز سفید)</label>
+        <div class="switch"><input type="checkbox" id="setAmbient"><span></span></div></div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">🎨 ظاهر</div>
+      <div class="set-row"><label>هدف روزانه (پومودورو)</label><input type="number" id="setGoal" min="1" max="30"></div>
+      <div class="set-row"><label>تم</label>
+        <div class="themes" id="themePicker"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">💾 داده‌ها</div>
+      <div class="row-btns">
+        <button class="btn ghost" id="exportBtn">📤 خروجی JSON</button>
+        <button class="btn ghost" id="importBtn">📥 ورودی JSON</button>
+        <input type="file" id="importFile" accept=".json" hidden>
+        <button class="btn danger" id="resetBtn2">🗑 پاک کردن همه</button>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">⌨️ کلیدهای میان‌بر</div>
+      <div style="font-size:12px;color:var(--muted);line-height:2.1">
+        <kbd>Space</kbd> شروع/توقف · <kbd>R</kbd> ریست · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> حالت ·
+        <kbd>N</kbd> تسک جدید · <kbd>F</kbd> حالت تمرکز · <kbd>T</kbd> تغییر تم · <kbd>Esc</kbd> خروج از تمرکز
+      </div>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   helpers
+============================================================ */
+const $  = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fa = n => String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+const dkey = (d=new Date()) => {
+  const t = new Date(d.getTime() - d.getTimezoneOffset()*60000);
+  return t.toISOString().slice(0,10);
+};
+const uid = () => Math.random().toString(36).slice(2,10);
+
+const CATS = [
+  {id:'work',     name:'کار',   color:'#ff3b30'},
+  {id:'study',    name:'درس',   color:'#007aff'},
+  {id:'personal', name:'شخصی',  color:'#34c759'},
+  {id:'health',   name:'سلامت', color:'#ff9500'},
+  {id:'other',    name:'دیگر',  color:'#8e8e93'},
+];
+const catOf = id => CATS.find(c=>c.id===id) || CATS[4];
+
+const PRI = {high:'زیاد', med:'متوسط', low:'کم'};
+const THEMES = [
+  {id:'light',  color:'#f5f5f7'},
+  {id:'dark',   color:'#1c1c1e'},
+  {id:'ocean',  color:'#0b1c2c'},
+  {id:'forest', color:'#0f1a14'},
+  {id:'sunset', color:'#2a1020'},
+];
+
+/* ============================================================
+   database
+============================================================ */
+const DB_KEY = 'focus_pro_v1';
+const defaults = () => ({
+  settings:{
+    work:25, short:5, long:15, longEvery:4,
+    autoBreak:true, autoNext:false,
+    notify:false, wake:false,
+    sound:'beep', volume:0.5, ambient:false,
+    goal:8, theme:'light'
+  },
+  tasks: [],
+  stats: {},
+  notes: {},
+  ui: { tab:'timer', filter:'all', search:'' }
+});
+
+let db = (() => {
+  try {
+    const raw = JSON.parse(localStorage.getItem(DB_KEY));
+    if (!raw) return defaults();
+    const d = defaults();
+    return {
+      settings: Object.assign(d.settings, raw.settings||{}),
+      tasks: Array.isArray(raw.tasks) ? raw.tasks : [],
+      stats: raw.stats || {},
+      notes: raw.notes || {},
+      ui: Object.assign(d.ui, raw.ui||{})
+    };
+  } catch { return defaults(); }
+})();
+
+const save = () => localStorage.setItem(DB_KEY, JSON.stringify(db));
+
+/* ============================================================
+   stats
+============================================================ */
+const statOf = k => db.stats[k] || (db.stats[k] = {pomos:0, minutes:0, tasks:0});
+function recordPomo(minutes, taskId){
+  const s = statOf(dkey());
+  s.pomos++; s.minutes += minutes;
+  if (taskId){
+    const t = db.tasks.find(x=>x.id===taskId);
+    if (t) t.pomos = (t.pomos||0) + 1;
+  }
+  save();
+}
+function rangeSum(days){
+  let pomos=0, minutes=0;
+  const d = new Date();
+  for (let i=0;i<days;i++){
+    const s = db.stats[dkey(d)];
+    if (s){ pomos += s.pomos; minutes += s.minutes; }
+    d.setDate(d.getDate()-1);
+  }
+  return {pomos, minutes};
+}
+function streak(){
+  let n = 0;
+  const d = new Date();
+  if (!(db.stats[dkey(d)]?.pomos)) d.setDate(d.getDate()-1);
+  while (db.stats[dkey(d)]?.pomos > 0){ n++; d.setDate(d.getDate()-1); }
+  return n;
+}
+
+/* ============================================================
+   toast
+============================================================ */
+let toastT;
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ============================================================
+   theme
+============================================================ */
+function applyTheme(){
+  document.body.dataset.theme = db.settings.theme;
+  const isDark = db.settings.theme !== 'light';
+  $('#themeBtn').textContent = isDark ? '☀️' : '🌙';
+  $$('#themePicker .theme-dot').forEach(el =>
+    el.classList.toggle('active', el.dataset.theme === db.settings.theme));
+}
+function cycleTheme(){
+  const i = THEMES.findIndex(t=>t.id===db.settings.theme);
+  db.settings.theme = THEMES[(i+1) % THEMES.length].id;
+  save(); applyTheme(); syncSettings();
+}
+
+/* ============================================================
+   sound
+============================================================ */
+let audioCtx = null;
+const getCtx = () => (audioCtx ||= new (window.AudioContext||window.webkitAudioContext)());
+
+function playSound(type){
+  if (type === 'none') return;
+  try {
+    const ctx = getCtx(), vol = db.settings.volume;
+    const notes = type === 'chime' ? [659, 880, 1175]
+                : type === 'bell'  ? [523, 523, 784]
+                : [880];
+    notes.forEach((f, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = type === 'bell' ? 'triangle' : 'sine';
+      o.frequency.value = f;
+      const t0 = ctx.currentTime + i*0.16;
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(vol*0.35, t0+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + (type==='bell'?1.6:0.55));
+      o.start(t0); o.stop(t0 + 1.8);
+    });
+  } catch {}
+}
+
+let ambientNodes = null;
+function toggleAmbient(on){
+  try {
+    if (on){
+      const ctx = getCtx();
+      const bufSize = ctx.sampleRate * 2;
+      const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      let last = 0;
+      for (let i=0;i<bufSize;i++){
+        const white = Math.random()*2 - 1;
+        last = (last + 0.02*white) / 1.02;
+        data[i] = last * 3.2;
+      }
+      const src = ctx.createBufferSource();
+      src.buffer = buf; src.loop = true;
+      const gain = ctx.createGain();
+      gain.gain.value = db.settings.volume * 0.28;
+      src.connect(gain); gain.connect(ctx.destination);
+      src.start();
+      ambientNodes = {src, gain};
+    } else if (ambientNodes){
+      ambientNodes.src.stop();
+      ambientNodes = null;
+    }
+  } catch {}
+  $('#soundToggle').textContent = on ? '🔊' : '🔇';
+  $('#soundToggle').classList.toggle('on', on);
+}
+
+/* ============================================================
+   notifications + wake lock
+============================================================ */
+function notify(title, body){
+  if (!db.settings.notify || !('Notification' in window)) return;
+  if (Notification.permission === 'granted') new Notification(title, {body, icon:'', silent:true});
+}
+let wakeLock = null;
+async function setWake(on){
+  if (!('wakeLock' in navigator)) return;
+  try {
+    if (on && !wakeLock) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    } else if (!on && wakeLock){
+      await wakeLock.release(); wakeLock = null;
+    }
+  } catch {}
+}
+
+/* ============================================================
+   timer
+============================================================ */
+const MODES = {
+  work:  {label:'کار',          key:'work'},
+  short: {label:'استراحت کوتاه', key:'short'},
+  long:  {label:'استراحت بلند',  key:'long'},
+};
+let mode = 'work';
+let total = 25*60;
+let remaining = total;
+let running = false;
+let timerId = null;
+
+function modeMinutes(m){
+  const s = db.settings;
+  return m === 'work' ? s.work : m === 'short' ? s.short : s.long;
+}
+function setMode(m, keepRunning=false){
+  mode = m;
+  $$('.mode-tabs button').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+  total = modeMinutes(m) * 60;
+  remaining = total;
+  if (!keepRunning) stopTimer();
+  renderTimer();
+}
+function renderTimer(){
+  const mm = String(Math.floor(remaining/60)).padStart(2,'0');
+  const ss = String(remaining%60).padStart(2,'0');
+  $('#time').textContent = `${mm}:${ss}`;
+  $('#time').classList.toggle('warn', remaining <= 60 && running);
+
+  const C = 2*Math.PI*100;
+  const prog = total ? remaining/total : 0;
+  $('#ringFg').style.strokeDashoffset = String(C * (1 - prog));
+
+  const label = MODES[mode].label;
+  document.title = running ? `${mm}:${ss} — ${label}` : 'تمرکز پرو';
+}
+function tick(){
+  remaining--;
+  if (remaining <= 0){ finishSession(); return; }
+  renderTimer();
+}
+function startTimer(){
+  if (running) return;
+  running = true;
+  $('#startBtn').textContent = 'توقف';
+  timerId = setInterval(tick, 1000);
+  if (db.settings.wake) setWake(true);
+  renderTimer();
+}
+function stopTimer(){
+  running = false;
+  clearInterval(timerId); timerId = null;
+  $('#startBtn').textContent = 'شروع';
+  setWake(false);
+  renderTimer();
+}
+function resetTimer(){ stopTimer(); remaining = total; renderTimer(); }
+
+function finishSession(){
+  stopTimer();
+  playSound(db.settings.sound);
+
+  if (mode === 'work'){
+    recordPomo(db.settings.work, $('#focusTaskSelect').value);
+    const done = statOf(dkey()).pomos;
+    notify('پومودورو تموم شد ✅', `وقتشه استراحت کنی. امروز ${done} تا زدی.`);
+    toast('پومودورو تموم شد! ☕');
+    renderStats(); renderFocusSelect();
+
+    const useLong = done % db.settings.longEvery === 0;
+    setMode(useLong ? 'long' : 'short');
+    if (db.settings.autoBreak) setTimeout(startTimer, 800);
+  } else {
+    notify('استراحت تموم شد ⏱', 'بریم سراغ پومودوروی بعدی.');
+    toast('استراحت تموم شد، بریم!');
+    setMode('work');
+    if (db.settings.autoNext) setTimeout(startTimer, 800);
+  }
+  beepTitle();
+}
+function beepTitle(){
+  let n = 0;
+  const iv = setInterval(()=>{
+    document.title = n%2 ? '⏰ زمان تموم شد!' : 'تمرکز پرو';
+    if (++n > 6) { clearInterval(iv); renderTimer(); }
+  }, 500);
+}
+
+$('#startBtn').onclick = () => running ? stopTimer() : startTimer();
+$('#resetBtn').onclick = resetTimer;
+$$('.mode-tabs button').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+
+/* ============================================================
+   tasks
+============================================================ */
+function renderCatOptions(){
+  const sel = $('#taskCat');
+  sel.innerHTML = CATS.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+}
+
+function filteredTasks(){
+  const {filter, search} = db.ui;
+  const q = (search||'').trim().toLowerCase();
+  return db.tasks.filter(t => {
+    if (filter === 'active' && t.done) return false;
+    if (filter === 'done' && !t.done) return false;
+    if (q && !t.text.toLowerCase().includes(q) &&
+        !(t.subtasks||[]).some(s=>s.text.toLowerCase().includes(q))) return false;
+    return true;
+  });
+}
+
+function renderTasks(){
+  const list = $('#taskList');
+  const items = filteredTasks();
+  if (!items.length){
+    list.innerHTML = `<li class="empty">${db.tasks.length ? 'چیزی پیدا نشد 🔍' : 'هنوز کاری اضافه نکردی ✨'}</li>`;
+    updateStatBoxes();
+    return;
+  }
+  list.innerHTML = items.map(t => {
+    const cat = catOf(t.cat);
+    const subs = t.subtasks || [];
+    const subsDone = subs.filter(s=>s.done).length;
+    const overdue = t.due && !t.done && t.due < dkey();
+    const dueTxt = t.due ? (overdue ? `⚠ ${t.due}` : `📅 ${t.due}`) : '';
+    return `
+    <li class="task ${t.done?'done':''}" data-id="${t.id}" draggable="true">
+      <input type="checkbox" ${t.done?'checked':''} data-act="toggle">
+      <div class="task-body">
+        <div class="task-title">${esc(t.text)}</div>
+        <div class="meta">
+          <span class="badge pri-${t.pri}">${PRI[t.pri]}</span>
+          <span class="badge" style="background:${cat.color}22;color:${cat.color}">${cat.name}</span>
+          ${dueTxt ? `<span class="badge due ${overdue?'overdue':''}" style="background:var(--hover);color:var(--muted)">${dueTxt}</span>` : ''}
+          ${t.pomos ? `<span class="badge" style="background:var(--accent-soft);color:var(--accent)">🍅 ${fa(t.pomos)}</span>` : ''}
+          ${subs.length ? `<span class="badge" style="background:var(--hover);color:var(--muted)" data-act="togglesubs">☑ ${fa(subsDone)}/${fa(subs.length)}</span>` : ''}
+        </div>
+        <div class="subs" data-subs="${t.id}">
+          ${subs.map((s,i)=>`
+            <div class="sub ${s.done?'done':''}">
+              <input type="checkbox" ${s.done?'checked':''} data-act="sub" data-i="${i}">
+              <span>${esc(s.text)}</span>
+              <button style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px" data-act="delsub" data-i="${i}">✕</button>
+            </div>`).join('')}
+          <div class="sub-add">
+            <input type="text" placeholder="زیرکار جدید..." data-subinput="${t.id}">
+            <button data-act="addsub">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="task-actions">
+        <button data-act="focus" title="تمرکز روی این">🎯</button>
+        <button data-act="del" title="حذف">✕</button>
+      </div>
+    </li>`;
+  }).join('');
+  updateStatBoxes();
+}
+
+function addTask(){
+  const text = $('#taskInput').value.trim();
+  if (!text) return;
+  db.tasks.unshift({
+    id: uid(), text, done: false,
+    pri: $('#taskPri').value,
+    cat: $('#taskCat').value,
+    due: $('#taskDue').value || '',
+    subtasks: [], pomos: 0,
+    createdAt: Date.now()
+  });
+  $('#taskInput').value = '';
+  $('#taskDue').value = '';
+  save(); renderTasks(); renderFocusSelect();
+  toast('تسک اضافه شد ✅');
+}
+
+$('#addBtn').onclick = addTask;
+$('#taskInput').addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
+$('#searchInput').addEventListener('input', e => {
+  db.ui.search = e.target.value; save(); renderTasks();
+});
+$$('.chip[data-filter]').forEach(c => c.onclick = () => {
+  db.ui.filter = c.dataset.filter;
+  $$('.chip[data-filter]').forEach(x => x.classList.toggle('active', x === c));
+  save(); renderTasks();
+});
+$('#clearDone').onclick = () => {
+  const n = db.tasks.filter(t=>t.done).length;
+  if (!n) return toast('چیزی برای حذف نیست');
+  if (!confirm(`${n} تسک انجام‌شده حذف بشه؟`)) return;
+  db.tasks = db.tasks.filter(t=>!t.done);
+  save(); renderTasks(); renderFocusSelect();
+  toast('پاک شد 🗑');
+};
+
+/* -------- task list events (delegation) -------- */
+$('#taskList').addEventListener('click', e => {
+  const li = e.target.closest('li.task'); if (!li) return;
+  const id = li.dataset.id;
+  const t = db.tasks.find(x => x.id === id); if (!t) return;
+  const act = e.target.dataset.act;
+
+  if (act === 'toggle'){
+    t.done = !t.done;
+    if (t.done){
+      t.completedAt = Date.now();
+      const s = statOf(dkey()); s.tasks = (s.tasks||0) + 1;
+      playSound(db.settings.sound === 'none' ? 'beep' : db.settings.sound);
+    } else if (t.completedAt){
+      const s = statOf(dkey()); s.tasks = Math.max(0, (s.tasks||0) - 1);
+    }
+    save(); renderTasks(); renderStats();
+  }
+  else if (act === 'del'){
+    db.tasks = db.tasks.filter(x => x.id !== id);
+    save(); renderTasks(); renderFocusSelect();
+  }
+  else if (act === 'togglesubs'){
+    li.querySelector('.subs')?.classList.toggle('open');
+  }
+  else if (act === 'sub'){
+    const i = +e.target.dataset.i;
+    t.subtasks[i].done = !t.subtasks[i].done;
+    save(); renderTasks();
+  }
+  else if (act === 'delsub'){
+    t.subtasks.splice(+e.target.dataset.i, 1);
+    save(); renderTasks();
+  }
+  else if (act === 'addsub'){
+    const inp = li.querySelector(`[data-subinput="${id}"]`);
+    const v = inp.value.trim();
+    if (!v) return;
+    t.subtasks.push({text:v, done:false});
+    save(); renderTasks();
+    li.querySelector('.subs')?.classList.add('open');
+  }
+  else if (act === 'focus'){
+    $('#focusTaskSelect').value = id;
+    db.ui.focusTask = id; save();
+    showTab('timer');
+    toast('روی این تسک تمرکز کن 🎯');
+  }
+});
+$('#taskList').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.dataset.subinput){
+    e.target.closest('.sub-add').querySelector('button[data-act=addsub]').click();
+  }
+});
+
+/* -------- drag & drop -------- */
+let dragId = null;
+$('#taskList').addEventListener('dragstart', e => {
+  const li = e.target.closest('li.task'); if (!li) return;
+  dragId = li.dataset.id; li.classList.add('dragging');
+});
+$('#taskList').addEventListener('dragend', e => {
+  $$('#taskList li').forEach(l => l.classList.remove('dragging','drop-target'));
+});
+$('#taskList').addEventListener('dragover', e => {
+  e.preventDefault();
+  const li = e.target.closest('li.task');
+  $$('#taskList li').forEach(l => l.classList.remove('drop-target'));
+  if (li && li.dataset.id !== dragId) li.classList.add('drop-target');
+});
+$('#taskList').addEventListener('drop', e => {
+  e.preventDefault();
+  const li = e.target.closest('li.task');
+  if (!li || !dragId || li.dataset.id === dragId) return;
+  const from = db.tasks.findIndex(t => t.id === dragId);
+  const to   = db.tasks.findIndex(t => t.id === li.dataset.id);
+  if (from < 0 || to < 0) return;
+  const [moved] = db.tasks.splice(from, 1);
+  db.tasks.splice(to, 0, moved);
+  save(); renderTasks();
+});
+
+/* ============================================================
+   focus task select
+============================================================ */
+function renderFocusSelect(){
+  const sel = $('#focusTaskSelect');
+  const active = db.tasks.filter(t => !t.done);
+  sel.innerHTML = '<option value="">— هیچ تسکی —</option>' +
+    active.map(t => `<option value="${t.id}">${esc(t.text)}</option>`).join('');
+  if (db.ui.focusTask && active.some(t=>t.id===db.ui.focusTask))
+    sel.value = db.ui.focusTask;
+  else db.ui.focusTask = '';
+}
+$('#focusTaskSelect').onchange = e => { db.ui.focusTask = e.target.value; save(); };
+
+/* ============================================================
+   stats rendering
+============================================================ */
+function updateStatBoxes(){
+  const t = statOf(dkey());
+  $('#statPomo').textContent  = fa(t.pomos);
+  $('#statMin').textContent   = fa(t.minutes);
+  $('#statTasks').textContent = fa(db.tasks.filter(x=>x.done).length);
+  const s = streak();
+  $('#streakLabel').textContent = `${fa(s)} روز پیوسته ${s>0?'🔥':''}`;
+}
+
+function renderStats(){
+  updateStatBoxes();
+  const today = statOf(dkey());
+  const week  = rangeSum(7);
+  const month = rangeSum(30);
+
+  $('#sToday').textContent  = fa(today.pomos);
+  $('#sWeek').textContent   = fa(week.pomos);
+  $('#sMonth').textContent  = fa(month.pomos);
+  $('#sStreak').textContent = fa(streak());
+
+  // goal
+  const goal = db.settings.goal || 8;
+  $('#goalText').textContent = `${fa(today.pomos)} / ${fa(goal)}`;
+  $('#goalFill').style.width = Math.min(100, today.pomos/goal*100) + '%';
+
+  // 7-day chart
+  const days = [];
+  const d = new Date();
+  for (let i=6;i>=0;i--){
+    const dd = new Date(d); dd.setDate(d.getDate()-i);
+    days.push({key: dkey(dd), label: 'ش ی د س چ پ ج'.split(' ')[dd.getDay()]});
+  }
+  const max = Math.max(1, ...days.map(x => db.stats[x.key]?.pomos || 0));
+  $('#chart7').innerHTML = days.map(x => {
+    const v = db.stats[x.key]?.pomos || 0;
+    const h = v ? Math.max(6, v/max*100) : 3;
+    return `<div class="bar-wrap">
+      <b>${v ? fa(v) : ''}</b>
+      <div class="bar" style="height:${h}%;opacity:${v?1:.25}"></div>
+      <span>${x.label}</span>
+    </div>`;
+  }).join('');
+
+  // heatmap 8 weeks
+  const cells = [];
+  const start = new Date(); start.setDate(start.getDate() - 55);
+  for (let i=0;i<56;i++){
+    const dd = new Date(start); dd.setDate(start.getDate()+i);
+    const v = db.stats[dkey(dd)]?.pomos || 0;
+    const op = v === 0 ? 0 : Math.min(1, 0.25 + v/8);
+    const title = `${dkey(dd)} — ${v} پومودورو`;
+    cells.push(`<i title="${title}" style="${v?`background:var(--accent);opacity:${op}`:''}"></i>`);
+  }
+  $('#heatmap').innerHTML = cells.join('');
+
+  // per category
+  const counts = {};
+  db.tasks.forEach(t => {
+    if (!t.pomos) return;
+    counts[t.cat] = (counts[t.cat]||0) + t.pomos;
+  });
+  const entries = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  $('#catStats').innerHTML = entries.length
+    ? entries.map(([c,v]) => {
+        const cat = catOf(c);
+        return `<div class="cat-row">
+          <span><i class="dot" style="background:${cat.color}"></i>${cat.name}</span>
+          <b>${fa(v)} 🍅</b></div>`;
+      }).join('')
+    : '<div class="empty">هنوز پومودورویی به تسکی وصل نشده</div>';
+
+  // notes
+  $('#notesArea').value = db.notes[dkey()] || '';
+}
+$('#notesArea').addEventListener('input', e => {
+  db.notes[dkey()] = e.target.value; save();
+});
+
+/* ============================================================
+   settings UI
+============================================================ */
+function syncSettings(){
+  const s = db.settings;
+  $('#setWork').value = s.work;
+  $('#setShort').value = s.short;
+  $('#setLong').value = s.long;
+  $('#setLongEvery').value = s.longEvery;
+  $('#setAutoBreak').checked = s.autoBreak;
+  $('#setAutoNext').checked = s.autoNext;
+  $('#setNotify').checked = s.notify;
+  $('#setWake').checked = s.wake;
+  $('#setSound').value = s.sound;
+  $('#setVolume').value = s.volume;
+  $('#setAmbient').checked = s.ambient;
+  $('#setGoal').value = s.goal;
+  applyTheme();
+}
+function renderThemePicker(){
+  $('#themePicker').innerHTML = THEMES.map(t =>
+    `<div class="theme-dot" data-theme="${t.id}" style="background:${t.color}"></div>`).join('');
+  $$('#themePicker .theme-dot').forEach(el => el.onclick = () => {
+    db.settings.theme = el.dataset.theme; save(); applyTheme();
+  });
+}
+
+function bindNumber(sel, key, after){
+  $(sel).addEventListener('change', e => {
+    const v = Math.max(1, +e.target.value || 1);
+    db.settings[key] = v; save();
+    if (after) after();
+  });
+}
+bindNumber('#setWork', 'work', () => { if (mode==='work') setMode('work'); });
+bindNumber('#setShort','short',() => { if (mode==='short') setMode('short'); });
+bindNumber('#setLong', 'long', () => { if (mode==='long') setMode('long'); });
+bindNumber('#setLongEvery','longEvery');
+bindNumber('#setGoal', 'goal', renderStats);
+
+$('#setAutoBreak').onchange = e => { db.settings.autoBreak = e.target.checked; save(); };
+$('#setAutoNext').onchange  = e => { db.settings.autoNext  = e.target.checked; save(); };
+$('#setWake').onchange      = e => { db.settings.wake      = e.target.checked; save(); };
+$('#setSound').onchange     = e => { db.settings.sound     = e.target.value; save(); playSound(e.target.value); };
+$('#setVolume').oninput     = e => {
+  db.settings.volume = +e.target.value; save();
+  if (ambientNodes) ambientNodes.gain.gain.value = db.settings.volume * 0.28;
+};
+$('#setAmbient').onchange = e => {
+  db.settings.ambient = e.target.checked; save();
+  toggleAmbient(e.target.checked);
+};
+$('#setNotify').onchange = async e => {
+  if (e.target.checked && 'Notification' in window){
+    const p = await Notification.requestPermission();
+    if (p !== 'granted'){
+      e.target.checked = false; toast('اجازه اعلان داده نشد');
+    }
+  }
+  db.settings.notify = e.target.checked; save();
+};
+
+/* ============================================================
+   export / import / reset
+============================================================ */
+$('#exportBtn').onclick = () => {
+  const blob = new Blob([JSON.stringify(db, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `focus-backup-${dkey()}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('فایل ذخیره شد 📤');
+};
+$('#importBtn').onclick = () => $('#importFile').click();
+$('#importFile').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const data = JSON.parse(r.result);
+      if (!data.settings || !Array.isArray(data.tasks)) throw new Error();
+      if (!confirm('داده‌های فعلی جایگزین بشن؟')) return;
+      db = Object.assign(defaults(), data);
+      save(); boot();
+      toast('بازیابی شد ✅');
+    } catch { toast('فایل معتبر نیست ❌'); }
+  };
+  r.readAsText(f);
+  e.target.value = '';
+};
+$('#resetBtn2').onclick = () => {
+  if (!confirm('همه‌چیز پاک بشه؟ این کار برگشت‌پذیر نیست!')) return;
+  localStorage.removeItem(DB_KEY);
+  db = defaults();
+  boot();
+  toast('همه‌چیز ریست شد');
+};
+
+/* ============================================================
+   tabs + focus mode
+============================================================ */
+function showTab(name){
+  db.ui.tab = name; save();
+  $$('.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
+  if (name === 'stats') renderStats();
+}
+$$('.tabs button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
+
+function toggleFocus(){
+  document.body.classList.toggle('focus');
+  const on = document.body.classList.contains('focus');
+  if (on && document.documentElement.requestFullscreen)
+    document.documentElement.requestFullscreen().catch(()=>{});
+  else if (!on && document.fullscreenElement)
+    document.exitFullscreen().catch(()=>{});
+}
+$('#focusToggle').onclick = toggleFocus;
+$('#themeBtn').onclick = cycleTheme;
+$('#soundToggle').onclick = () => {
+  db.settings.ambient = !db.settings.ambient;
+  save(); $('#setAmbient').checked = db.settings.ambient;
+  toggleAmbient(db.settings.ambient);
+  toast(db.settings.ambient ? 'صدای محیط روشن 🔊' : 'صدای محیط خاموش 🔇');
+};
+
+/* ============================================================
+   keyboard shortcuts
+============================================================ */
+document.addEventListener('keydown', e => {
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') {
+    if (e.key === 'Escape') e.target.blur();
+    return;
+  }
+  const k = e.key.toLowerCase();
+  if (e.code === 'Space'){ e.preventDefault(); running ? stopTimer() : startTimer(); }
+  else if (k === 'r'){ resetTimer(); }
+  else if (k === '1'){ setMode('work'); }
+  else if (k === '2'){ setMode('short'); }
+  else if (k === '3'){ setMode('long'); }
+  else if (k === 'n'){ showTab('tasks'); setTimeout(()=>$('#taskInput').focus(), 60); }
+  else if (k === 'f'){ toggleFocus(); }
+  else if (k === 't'){ cycleTheme(); }
+  else if (e.key === 'Escape' && document.body.classList.contains('focus')){ toggleFocus(); }
+});
+
+/* ============================================================
+   PWA manifest (inline)
+============================================================ */
+(function(){
+  const manifest = {
+    name: 'تمرکز پرو', short_name: 'تمرکز', start_url: '.', display: 'standalone',
+    background_color: '#f5f5f7', theme_color: '#ff3b30', dir: 'rtl', lang: 'fa'
+  };
+  const link = document.createElement('link');
+  link.rel = 'manifest';
+  link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'}));
+  document.head.appendChild(link);
+})();
+
+/* ============================================================
+   boot
+============================================================ */
+function boot(){
+  renderCatOptions();
+  renderThemePicker();
+  syncSettings();
+  renderFocusSelect();
+  renderTasks();
+  renderStats();
+  setMode(mode, false);
+  showTab(db.ui.tab || 'timer');
+  $('#searchInput').value = db.ui.search || '';
+  $$('.chip[data-filter]').forEach(c =>
+    c.classList.toggle('active', c.dataset.filter === (db.ui.filter||'all')));
+  if (db.settings.ambient) toggleAmbient(true);
+  updateStatBoxes();
+}
+boot();
+
+/* prevent accidental tab close while running */
+window.addEventListener('beforeunload', e => {
+  if (running){ e.preventDefault(); e.returnValue = ''; }
+});
+
+/* re-acquire wake lock when returning to tab */
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && running && db.settings.wake) setWake(true);
+});
+</script>
+</body>
+</html>
