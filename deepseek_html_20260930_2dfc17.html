@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>بانک افکت صوتی — پخش و دانلود مستقیم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070a14;
+    --card:rgba(255,255,255,.045);
+    --line:rgba(255,255,255,.09);
+    --txt:#e9eefb;
+    --muted:#8b97b8;
+    --acc:#6ee7f9;
+    --acc2:#a78bfa;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    margin:0;padding:0 0 70px;
+    font-family:'Vazirmatn',Tahoma,system-ui,sans-serif;
+    color:var(--txt);
+    background:
+      radial-gradient(900px 500px at 12% -8%, rgba(110,231,249,.16), transparent 60%),
+      radial-gradient(900px 500px at 88% -2%, rgba(167,139,250,.16), transparent 60%),
+      var(--bg);
+    min-height:100vh;
+  }
+  header{text-align:center;padding:40px 18px 8px}
+  h1{
+    margin:0;font-size:clamp(23px,4vw,38px);font-weight:800;letter-spacing:-.5px;
+    background:linear-gradient(90deg,#6ee7f9,#a78bfa 55%,#f0abfc);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  header p{margin:12px 0 0;color:var(--muted);font-size:14px}
+
+  .toolbar{
+    position:sticky;top:10px;z-index:30;
+    display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;
+    padding:13px 16px;margin:20px auto 24px;max-width:1200px;width:calc(100% - 36px);
+    background:rgba(10,14,26,.78);backdrop-filter:blur(16px);
+    border:1px solid var(--line);border-radius:18px;
+    box-shadow:0 12px 40px rgba(0,0,0,.45);
+  }
+  input[type=search],select{
+    background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--txt);
+    padding:10px 14px;border-radius:12px;font-family:inherit;font-size:14px;outline:none;
+    transition:.2s;
+  }
+  input[type=search]{min-width:200px}
+  input[type=search]::placeholder{color:#66739a}
+  input:focus,select:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(110,231,249,.13)}
+  select option{background:#111827;color:#e9eefb}
+
+  .vol{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;height:6px;border-radius:99px;width:110px;
+    background:linear-gradient(90deg,var(--acc),var(--acc2));outline:none;cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+    background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:pointer;
+  }
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border:none;border-radius:50%;background:#fff;cursor:pointer}
+
+  .btn{
+    border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--txt);
+    border-radius:11px;padding:10px 14px;font-family:inherit;font-size:13px;font-weight:600;
+    cursor:pointer;transition:.18s;white-space:nowrap;
+  }
+  .btn:hover{background:rgba(255,255,255,.13);transform:translateY(-1px)}
+  .btn:active{transform:translateY(0) scale(.98)}
+  .btn:disabled{opacity:.55;cursor:progress;transform:none}
+  .btn.primary{background:linear-gradient(135deg,#6ee7f9,#a78bfa);color:#08101f;border:none}
+  .btn.primary:hover{filter:brightness(1.1)}
+
+  .grid{
+    max-width:1200px;margin:0 auto;padding:0 18px;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:14px;
+  }
+  .card{
+    position:relative;overflow:hidden;
+    background:var(--card);border:1px solid var(--line);border-radius:18px;
+    padding:16px 13px 12px;text-align:center;
+    transition:transform .22s, background .22s, border-color .22s, box-shadow .22s;
+  }
+  .card:hover{background:rgba(255,255,255,.085);transform:translateY(-3px);border-color:rgba(110,231,249,.35)}
+  .card.playing{
+    border-color:var(--acc);background:rgba(110,231,249,.09);
+    box-shadow:0 0 0 1px var(--acc), 0 0 30px rgba(110,231,249,.32);
+  }
+  .card.playing .icon{animation:pulse .9s ease-in-out infinite}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+  .icon{font-size:34px;line-height:1;margin-bottom:10px;display:block;transition:.2s}
+  .name{font-weight:700;font-size:15px;margin-bottom:3px}
+  .cat{font-size:11px;color:var(--muted);margin-bottom:12px}
+  .actions{display:flex;gap:7px;justify-content:center}
+  .actions .btn{flex:1;padding:8px 6px;font-size:12.5px;border-radius:10px}
+  .actions .dl{flex:0 0 44px;font-size:15px;padding:8px 0}
+
+  .empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:60px 0;font-size:15px}
+  footer{text-align:center;color:#5b6889;font-size:12.5px;padding:44px 20px 0;line-height:2}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-track{background:#0a0e18}
+  ::-webkit-scrollbar-thumb{background:#25304d;border-radius:99px}
+  ::-webkit-scrollbar-thumb:hover{background:#33415f}
+  @media(max-width:520px){
+    .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:11px}
+    .icon{font-size:29px}
+    .name{font-size:13.5px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎧 بانک افکت صوتی</h1>
+  <p><span id="count">۵۴</span> افکت صوتی آماده — پخش آنی و دانلود مستقیم با فرمت WAV</p>
+</header>
+
+<div class="toolbar">
+  <input type="search" id="search" placeholder="🔍 جستجو...">
+  <select id="cat">
+    <option value="all">همه دسته‌ها</option>
+    <option>رابط کاربری</option>
+    <option>هشدار</option>
+    <option>بازی</option>
+    <option>ترنزیشن</option>
+    <option>دیجیتال</option>
+    <option>طبیعت</option>
+    <option>موسیقی</option>
+  </select>
+  <label class="vol">🔊 <input type="range" id="vol" min="0" max="100" value="80"></label>
+  <button class="btn" id="stopBtn">⏹ توقف</button>
+  <button class="btn primary" id="dlAll">⬇ دانلود همه</button>
+</div>
+
+<main class="grid" id="grid"></main>
+
+<footer>
+  ساخته‌شده با Web Audio API — همه صداها به‌صورت زنده ساخته می‌شوند و فایل WAV بدون هیچ واسطه‌ای دانلود می‌شود.
+</footer>
+
+<script>
+/* ============================================================
+   ۱) ابزارهای ساخت صدا
+   ============================================================ */
+
+function noiseBuffer(ctx, dur) {
+  const len = Math.max(1, Math.floor(ctx.sampleRate * dur));
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  return buf;
+}
+
+/* اسیلاتور + پاکت */
+function tone(ctx, out, o = {}) {
+  const t0 = o.t0 ?? 0;
+  const dur = o.dur ?? 0.3;
+  const peak = o.gain ?? 0.25;
+  const atk = Math.min(o.atk ?? 0.005, dur * 0.4);
+  const rel = Math.min(o.rel ?? 0.05, dur - atk);
+
+  const osc = ctx.createOscillator();
+  osc.type = o.type || 'sine';
+  osc.frequency.setValueAtTime(Math.max(1, o.freq ?? 440), t0);
+  if (o.freqEnd != null) {
+    osc.frequency.exponentialRampToValueAtTime(Math.max(1, o.freqEnd), t0 + dur);
+  }
+
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(Math.max(0.0001, peak), t0 + atk);
+  g.gain.setValueAtTime(Math.max(0.0001, peak), t0 + Math.max(atk, dur - rel));
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+  osc.connect(g);
+  let tail = g;
+  if (o.filter) {
+    const f = ctx.createBiquadFilter();
+    f.type = o.filter;
+    f.frequency.value = o.cutoff ?? 1200;
+    f.Q.value = o.q ?? 0.7;
+    g.connect(f);
+    tail = f;
+  }
+  tail.connect(out);
+
+  osc.start(t0);
+  osc.stop(t0 + dur + 0.03);
+  return osc;
+}
+
+/* نویز + فیلتر + پاکت */
+function noise(ctx, out, o = {}) {
+  const t0 = o.t0 ?? 0;
+  const dur = o.dur ?? 0.3;
+  const peak = o.gain ?? 0.25;
+  const atk = Math.min(o.atk ?? 0.005, dur * 0.4);
+  const rel = Math.min(o.rel ?? 0.05, dur - atk);
+
+  const src = ctx.createBufferSource();
+  src.buffer = noiseBuffer(ctx, dur + 0.06);
+
+  let node = src, filter = null;
+  if (o.filter) {
+    filter = ctx.createBiquadFilter();
+    filter.type = o.filter;
+    filter.frequency.setValueAtTime(Math.max(1, o.freq ?? 1000), t0);
+    if (o.freqEnd != null) {
+      filter.frequency.exponentialRampToValueAtTime(Math.max(1, o.freqEnd), t0 + dur);
+    }
+    filter.Q.value = o.q ?? 0.7;
+    src.connect(filter);
+    node = filter;
+  }
+
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(Math.max(0.0001, peak), t0 + atk);
+  g.gain.setValueAtTime(Math.max(0.0001, peak), t0 + Math.max(atk, dur - rel));
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+  node.connect(g);
+  g.connect(out);
+
+  src.start(t0);
+  src.stop(t0 + dur + 0.03);
+  return { src, filter, gain: g };
+}
+
+/* ============================================================
+   ۲) کتابخانه افکت‌ها
+   ============================================================ */
+
+const SOUNDS = [
+
+/* ---------- رابط کاربری ---------- */
+{id:'beep', name:'بیپ', icon:'🔵', cat:'رابط کاربری', dur:0.3, build:(c,o)=>{
+  tone(c,o,{type:'sine', freq:880, dur:0.18, gain:0.35});
+}},
+{id:'click', name:'کلیک', icon:'🖱️', cat:'رابط کاربری', dur:0.15, build:(c,o)=>{
+  noise(c,o,{filter:'highpass', freq:2500, dur:0.04, gain:0.35, rel:0.03});
+  tone(c,o,{type:'square', freq:1800, dur:0.03, gain:0.12});
+}},
+{id:'pop', name:'پاپ', icon:'🎈', cat:'رابط کاربری', dur:0.2, build:(c,o)=>{
+  tone(c,o,{type:'sine', freq:400, freqEnd:1600, dur:0.1, gain:0.35});
+}},
+{id:'blip', name:'بلیپ', icon:'📶', cat:'رابط کاربری', dur:0.15, build:(c,o)=>{
+  tone(c,o,{type:'square', freq:1200, dur:0.06, gain:0.2});
+}},
+{id:'toggle', name:'تاگل', icon:'🎚️', cat:'رابط کاربری', dur:0.2, build:(c,o)=>{
+  tone(c,o,{type:'triangle', freq:1400, dur:0.05, gain:0.25});
+  tone(c,o,{type:'triangle', freq:900, t0:0.06, dur:0.06, gain:0.25});
+}},
+{id:'success', name:'موفقیت', icon:'✅', cat:'رابط کاربری', dur:0.9, build:(c,o)=>{
+  [523.25,659.25,783.99,1046.5].forEach((f,i)=>
+    tone(c,o,{type:'sine', freq:f, t0:i*0.09, dur:0.35, gain:0.28, rel:0.25}));
+}},
+{id:'error', name:'خطا', icon:'❌', cat:'رابط کاربری', dur:0.75, build:(c,o)=>{
+  tone(c,o,{type:'square', freq:220, freqEnd:110, dur:0.35, gain:0.2, rel:0.2});
+  tone(c,o,{type:'square', freq:220, freqEnd:110, t0:0.4, dur:0.3, gain:0.2, rel:0.2});
+}},
+{id:'notify', name:'نوتیفیکیشن', icon:'📩', cat:'رابط کاربری', dur:0.7, build:(c,o)=>{
+  tone(c,o,{type:'sine', freq:1046.5, dur:0.15, gain:0.3});
+  tone(c,o,{type:'sine', freq:1318.5, t0:0.13, dur:0.35, gain:0.3, rel:0.25});
+}},
+
+/* ---------- هشدار ---------- */
+{id:'warning', name:'هشدار', icon:'⚠️', cat:'هشدار', dur:0.8, build:(c,o)=>{
+  [0,0.2,0.4].forEach(t=>tone(c,o,{type:'square', freq:660, t0:t, dur:0.12, gain:0.22, rel:0.08}));
+}},
+{id:'alarm', name:'آژیر', icon:'🚨', cat:'هشدار', dur:1.6, build:(c,o)=>{
+  for(let i=0;i<8;i++)
+    tone(c,o,{type:'sawtooth', freq:i%2?600:900, t0:i*0.18, dur:0.16, gain:0.2, rel:0.06});
+}},
+{id:'siren', name:'سایرن', icon:'📢', cat:'هشدار', dur:2.0, build:(c,o)=>{
+  for(let i=0;i<4;i++){
+    const up = i%2===0;
+    tone(c,o,{type:'sine', freq:up?500:1200, freqEnd:up?1200:500, t0:i*0.5, dur:0.5, gain:0.25, atk:0.02, rel:0.05});
+  }
+}},
+{id:'buzzer', name:'بوق خطا', icon:'📣', cat:'هشدار', dur:1.0, build:(c,o)=>{
+  tone(c,o,{type:'square', freq:110, dur:0.8, gain:0.26, atk:0.01, rel:0.05});
+  tone(c,o,{type:'square', freq:113, dur:0.8, gain:0.18, atk:0.01, rel:0.05});
+}},
+
+/* ---------- بازی ---------- */
+{id:'coin', name:'سکه', icon:'🪙', cat:'بازی', dur:0.7, build:(c,o)=>{
+  tone(c,o,{type:'square', freq:987.77, dur:0.08, gain:0.2, rel:0.03});
+  tone(c,o,{type:'square', freq:1318.51, t0:0.08, dur:0.4, gain:0.2, rel:0.3});
+}},
+{id:'jump', name:'پرش', icon:'🦘', cat:'بازی', dur:0.4, build:(c,o)=>{
+  tone(c,o,{type:'square', freq:200, freqEnd:700, dur:0.2, gain:0.2, rel:0.1});
+}},
+{id:'powerup', name:'پاورآپ', icon:'🌟', cat:'بازی', dur:0.7, build:(c,o)=>{
+  [523,659,784,1047,1319].forEach((f,i)=>
+    tone(c,o,{type:'square', freq:f, t0:i*0.06, dur:0.09, gain:0.17, rel:0.04}));
+}},
+{id:'laser', name:'لیزر', icon:'🔫', cat:'بازی', dur:0.5, build:(c,o)=>{
+  tone(c,o,{type:'sawtooth', freq:1800, freqEnd:150, dur:0.3, gain:0.24, rel:0.15});
+  noise(c,o,{filter:'highpass', freq:1500, dur:0.12, gain:0.1});
+}},
+{id:'explosion', name:'انفجار', icon:'💥', cat:'بازی', dur:1.6, build:(c,o)=>{
+  noise(c,o,{filter:'lowpass', freq:900, freqEnd:60, dur:1.2, gain:0.55, atk:0.005, rel:1.0});
+  tone(c,o,{type:'sine', freq:110, freqEnd:30, dur:0.9, gain:0.4, rel:0.7});
+}},
+{id:'hit', name:'ضربه', icon:'👊', cat:'بازی', dur:0.4, build:(c,o)=>{
+  tone(c,o,{type:'square', freq:220, freqEnd:60, dur:0.18, gain:0.3, rel:0.12});
+  noise(c,o,{filter:'bandpass', freq:1200, q:1, dur:0.12, gain:0.25, rel:0.08});
+}},
+{id:'gameover', name:'پایان بازی', icon:'💀', cat:'بازی', dur:1.5, build:(c,o)=>{
+  [392,330,262,196].forEach((f,i)=>
+    tone(c,o,{type:'triangle', freq:f, t0:i*0.25, dur:0.3, gain:0.3, rel:0.2}));
+}},
+{id:'levelup', name:'لِوِل آپ', icon:'🏆', cat:'بازی', dur:1.2, build:(c,o)=>{
+  [523,587,659,784,880,1047,1319].forEach((f,i)=>
+    tone(c,o,{type:'triangle', freq:f, t0:i*0.08, dur:0.25, gain:0.24, rel:0.18}));
+}},
+{id:'teleport', name:'تلپورت', icon:'🌀', cat:'بازی', dur:1.0, build:(c,o)=>{
+  tone(c,o,{type:'sine', freq:200, freqEnd:1800, dur:0.35, gain:0.25, rel:0.1});
+  tone(c,o,{type:'sine', freq:1800, freqEnd:200, t0:0.4, dur:0.4, gain:0.25, rel:0.2});
+}},
+{id:'shield', name:'سپر', icon:'🛡️', cat:'بازی', dur:0.9, build:(c,o)=>{
+  const osc = tone(c,o,{type:'triangle', freq:320, freqEnd:640, dur:0.7, gain:0.25, rel:0.4});
+  const lfo = c.createOscillator(); lfo.frequency.value = 18;
+  const lg = c.createGain(); lg.gain.value = 25;
+  lfo.connect(lg).connect(osc.frequency);
+  lfo.start(0); lfo.stop(0.8);
+}},
+{id:'coinflip', name:'شیر یا خط', icon:'🎯', cat:'بازی', dur:0.6, build:(c,o)=>{
+  tone(c,o,{type:'triangle', freq:1600, dur:0.06, gain:0.2});
+  tone(c,o,{type:'triangle', freq:2200, t0:0.1, dur:0.5, gain:0.14, rel:0.4});
+}},
+{id:'kaching', name:'صندوق', icon:'💰', cat:'بازی', dur:1.2, build:(c,o)=>{
+  tone(c,o,{type:'triangle', freq:1046.5, dur:0.5, gain:0.24, rel:0.4});
+  tone(c,o,{type:'triangle', freq:1568, t0:0.08, dur:0.6, gain:0.2, rel:0.5});
+  noise(c,o,{filter:'highpass', freq:4000, dur:0.3, gain:0.14, rel:0.25});
+}},
+{id:'sparkle', name:'جرقه', icon:'✨', cat:'بازی', dur:1.2, build:(c,o)=>{
+  for(let i=0;i<9;i++)
+    tone(c,o,{type:'sine', freq:1500+Math.random()*3000, t0:Math.random()*0.8, dur:0.15, gain:0.11, rel:0.12});
+}},
+
+/* ---------- ترنزیشن ---------- */
+{id:'whoosh', name:'وووش', icon:'💨', cat:'ترنزیشن', dur:0.8, build:(c,o)=>{
+  noise(c,o,{filter:'bandpass', freq:300, freqEnd:3000, q:1.5, dur:0.5, gain:0.4, atk:0.15, rel:0.3});
+}},
+{id:'swoosh', name:'سوووش', icon:'🌪️', cat:'ترنزیشن', dur:0.8, build:(c,o)=>{
+  noise(c,o,{filter:'bandpass', freq:3000, freqEnd:300, q:1.5, dur:0.5, gain:0.4, atk:0.02, rel:0.35});
+}},
+{id:'riser', name:'رایزر', icon:'📈', cat:'ترنزیشن', dur:3.0, build:(c,o)=>{
+  tone(c,o,{type:'sawtooth', freq:120, freqEnd:1800, dur:2.6, gain:0.14, atk:0.3, rel:0.3, filter:'lowpass', cutoff:2200});
+  noise(c,o,{filter:'bandpass', freq:400, freqEnd:6000, q:1, dur:2.6, gain:0.24, atk:0.5, rel:0.4});
+}},
+{id:'downlifter', name:'داونلیفتر', icon:'📉', cat:'ترنزیشن', dur:3.0, build:(c,o)=>{
+  tone(c,o,{type:'sawtooth', freq:1800, freqEnd:80, dur:2.6, gain:0.16, atk:0.01, rel:1.2, filter:'lowpass', cutoff:2600});
+  noise(c,o,{filter:'lowpass', freq:6000, freqEnd:300, dur:2.6, gain:0.24, atk:0.01, rel:1.5});
+}},
+{id:'boom', name:'بوم', icon:'🔊', cat:'ترنزیشن', dur:1.8, build:(c,o)=>{
+  tone(c,o,{type:'sine', freq:150, freqEnd:35, dur:1.2, gain:0.6, rel:0.9});
+  noise(c,o,{filter:'lowpass', freq:400, freqEnd:50, dur:1.4, gain:0.33, rel:1.1});
+}},
+{id:'zap', name:'زپ', icon:'⚡', cat:'ترنزیشن', dur:0.4, build:(c,o)=>{
+  tone(c,o,{type:'square', freq:2400, freqEnd:180, dur:0.15, gain:0.24, rel:0.08});
+  noise(c,o,{filter:'highpass', freq:2000, dur:0.1, gain:0.2, rel:0.07});
+}},
+
+/* ---------- دیجیتال ---------- */
+{id:'glitch', name:'گلیچ', icon:'👾', cat:'دیجیتال', dur:1.0, build:(c,o)=>{
+  for(let i=0;i<14;i++)
+    tone(c,o,{type:'square', freq:200+Math.random()*3000, t0:i*0.065, dur:0.04, gain:0.14, rel:0.02});
+  noise(c,o,{filter:'highpass', freq:3000, dur:0.9, gain:0.07, atk:0.05, rel:0.4});
+}},
+{id:'static', name:'استاتیک', icon:'📺', cat:'دیجیتال', dur:1.5, build:(c,o)=>{
+  noise(c,o,{filter:'bandpass', freq:1500, q:0.4, dur:1.3, gain:0.3, atk:0.05, rel:0.3});
+  noise(c,o,{filter:'highpass', freq:5000, dur:1.3, gain:0.11, atk:0.05, rel:0.3});
+}},
+{id:'robot', name:'ربات', icon:'🤖', cat:'دیجیتال', dur:1.2, build:(c,o)=>{
+  [300,520,240,700,180,420,900,260,600,340].forEach((f,i)=>
+    tone(c,o,{type:'square', freq:f, t0:i*0.1, dur:0.09, gain:0.15, rel:0.03}));
+}},
+{id:'ufo', name:'بشقاب‌پرنده', icon:'🛸', cat:'دیجیتال', dur:1.6, build:(c,o)=>{
+  const osc = tone(c,o,{type:'sine', freq:400, freqEnd:900, dur:1.4, gain:0.25, atk:0.1, rel:0.4});
+  const lfo = c.createOscillator(); lfo.frequency.value = 8;
+  const lg = c.createGain(); lg.gain.value = 120;
+  lfo.connect(lg).connect(osc.frequency);
+  lfo.start(0); lfo.stop(1.5);
+}},
+{id:'sonar', name:'سونار', icon:'📡', cat:'دیجیتال', dur:2.5, build:(c,o)=>{
+  [0,0.45,0.9,1.4,1.9].forEach((t,i)=>
+    tone(c,o,{type:'sine', freq:1200, t0:t, dur:0.4, gain:0.3*(1-i*0.15), rel:0.35}));
+}},
+{id:'typewriter', name:'ماشین تحریر', icon:'⌨️', cat:'دیجیتال', dur:0.5, build:(c,o)=>{
+  noise(c,o,{filter:'highpass', freq:2000, dur:0.03, gain:0.3, rel:0.02});
+  tone(c,o,{type:'square', freq:300, dur:0.02, gain:0.1});
+  noise(c,o,{filter:'highpass', freq:2500, t0:0.08, dur:0.03, gain:0.24, rel:0.02});
+  tone(c,o,{type:'sine', freq:2200, t0:0.2, dur:0.15, gain:0.1, rel:0.1});
+}},
+{id:'camera', name:'دوربین', icon:'📷', cat:'دیجیتال', dur:0.4, build:(c,o)=>{
+  noise(c,o,{filter:'highpass', freq:1500, dur:0.04, gain:0.35, rel:0.03});
+  noise(c,o,{filter:'highpass', freq:2500, t0:0.09, dur:0.05, gain:0.3, rel:0.04});
+}},
+{id:'tick', name:'تیک‌تاک', icon:'⏰', cat:'دیجیتال', dur:1.2, build:(c,o)=>{
+  [0,0.6].forEach((t,i)=>{
+    noise(c,o,{filter:'highpass', freq:4000, t0:t, dur:0.03, gain:0.3, rel:0.02});
+    tone(c,o,{type:'square', freq:i?1400:2000, t0:t, dur:0.02, gain:0.11});
+  });
+}},
+
+/* ---------- طبیعت ---------- */
+{id:'thunder', name:'رعد', icon:'⛈️', cat:'طبیعت', dur:3.5, build:(c,o)=>{
+  noise(c,o,{filter:'lowpass', freq:600, freqEnd:70, dur:2.2, gain:0.5, atk:0.02, rel:1.6});
+  noise(c,o,{filter:'lowpass', freq:200, freqEnd:60, t0:0.4, dur:2.0, gain:0.33, atk:0.4, rel:1.4});
+  tone(c,o,{type:'sine', freq:70, freqEnd:28, dur:1.5, gain:0.35, rel:1.2});
+}},
+{id:'wind', name:'باد', icon:'🍃', cat:'طبیعت', dur:3.5, build:(c,o)=>{
+  const n = noise(c,o,{filter:'bandpass', freq:500, q:0.8, dur:3.0, gain:0.28, atk:1.0, rel:1.0});
+  const lfo = c.createOscillator(); lfo.frequency.value = 0.35;
+  const lg = c.createGain(); lg.gain.value = 300;
+  lfo.connect(lg).connect(n.filter.frequency);
+  lfo.start(0); lfo.stop(3.2);
+  noise(c,o,{filter:'highpass', freq:2000, dur:3.0, gain:0.07, atk:1.2, rel:1.0});
+}},
+{id:'rain', name:'باران', icon:'🌧️', cat:'طبیعت', dur:4.0, build:(c,o)=>{
+  noise(c,o,{filter:'highpass', freq:1000, dur:3.5, gain:0.24, atk:0.3, rel:0.8});
+  for(let i=0;i<28;i++){
+    tone(c,o,{type:'sine', freq:1200+Math.random()*2500, t0:Math.random()*3.2, dur:0.03, gain:0.055, rel:0.02});
+  }
+}},
+{id:'knock', name:'در زدن', icon:'🚪', cat:'طبیعت', dur:0.9, build:(c,o)=>{
+  [0,0.2,0.4].forEach(t=>{
+    tone(c,o,{type:'sine', freq:150, freqEnd:70, t0:t, dur:0.12, gain:0.4, rel:0.1});
+    noise(c,o,{filter:'lowpass', freq:600, t0:t, dur:0.08, gain:0.24, rel:0.06});
+  });
+}},
+{id:'glass', name:'شکستن شیشه', icon:'🥂', cat:'طبیعت', dur:1.2, build:(c,o)=>{
+  noise(c,o,{filter:'highpass', freq:3000, dur:0.15, gain:0.33, rel:0.12});
+  for(let i=0;i<14;i++)
+    tone(c,o,{type:'triangle', freq:1500+Math.random()*4000, t0:0.05+Math.random()*0.55, dur:0.06, gain:0.09, rel:0.05});
+}},
+{id:'bubble', name:'حباب', icon:'🫧', cat:'طبیعت', dur:0.6, build:(c,o)=>{
+  [0,0.12,0.26,0.4].forEach((t,i)=>
+    tone(c,o,{type:'sine', freq:300+i*180, freqEnd:900+i*300, t0:t, dur:0.1, gain:0.22, rel:0.06}));
+}},
+{id:'drop', name:'قطره آب', icon:'💧', cat:'طبیعت', dur:0.5, build:(c,o)=>{
+  tone(c,o,{type:'sine', freq:900, freqEnd:1800, dur:0.08, gain:0.3, rel:0.05});
+  tone(c,o,{type:'sine', freq:1800, freqEnd:600, t0:0.08, dur:0.2, gain:0.14, rel:0.15});
+}},
+{id:'heartbeat', name:'ضربان قلب', icon:'❤️', cat:'طبیعت', dur:1.5, build:(c,o)=>{
+  [0,0.28,0.8,1.08].forEach(t=>
+    tone(c,o,{type:'sine', freq:70, freqEnd:35, t0:t, dur:0.18, gain:0.5, rel:0.14}));
+}},
+
+/* ---------- موسیقی / درام ---------- */
+{id:'kick', name:'کیک', icon:'🥁', cat:'موسیقی', dur:0.6, build:(c,o)=>{
+  tone(c,o,{type:'sine', freq:160, freqEnd:45, dur:0.35, gain:0.6, rel:0.3});
+  noise(c,o,{filter:'lowpass', freq:300, dur:0.05, gain:0.2, rel:0.04});
+}},
+{id:'snare', name:'اسنر', icon:'🪘', cat:'موسیقی', dur:0.5, build:(c,o)=>{
+  noise(c,o,{filter:'bandpass', freq:1800, q:0.8, dur:0.2, gain:0.35, rel:0.16});
+  tone(c,o,{type:'triangle', freq:190, freqEnd:120, dur:0.12, gain:0.25, rel:0.1});
+}},
+{id:'hihat', name:'های‌هت', icon:'🎩', cat:'موسیقی', dur:0.25, build:(c,o)=>{
+  noise(c,o,{filter:'highpass', freq:7000, dur:0.08, gain:0.3, rel:0.06});
+}},
+{id:'bass', name:'باس', icon:'🎸', cat:'موسیقی', dur:1.5, build:(c,o)=>{
+  tone(c,o,{type:'sawtooth', freq:55, dur:1.2, gain:0.4, atk:0.01, rel:0.8, filter:'lowpass', cutoff:300, q:3});
+  tone(c,o,{type:'sine', freq:110, dur:1.2, gain:0.18, atk:0.01, rel:0.8});
+}},
+{id:'chord', name:'آکورد پد', icon:'🎹', cat:'موسیقی', dur:2.6, build:(c,o)=>{
+  [261.63,329.63,392,523.25].forEach(f=>
+    tone(c,o,{type:'triangle', freq:f, dur:2.0, gain:0.11, atk:0.4, rel:1.2, filter:'lowpass', cutoff:1800}));
+}},
+{id:'arpeggio', name:'آرپژ', icon:'🎼', cat:'موسیقی', dur:1.5, build:(c,o)=>{
+  [523.25,659.25,783.99,1046.5,783.99,659.25].forEach((f,i)=>
+    tone(c,o,{type:'triangle', freq:f, t0:i*0.12, dur:0.3, gain:0.2, rel:0.22}));
+}},
+{id:'drone', name:'درون', icon:'🌌', cat:'موسیقی', dur:3.5, build:(c,o)=>{
+  [55,55.4,110.2].forEach(f=>
+    tone(c,o,{type:'sawtooth', freq:f, dur:3.0, gain:0.14, atk:0.6, rel:1.5, filter:'lowpass', cutoff:700, q:2}));
+}},
+
+];
+
+/* ============================================================
+   ۳) رندر آفلاین + انکود WAV
+   ============================================================ */
+
+async function renderBuffer(sound) {
+  const sr = 44100;
+  const ctx = new OfflineAudioContext(1, Math.ceil(sr * (sound.dur + 0.2)), sr);
+
+  const master = ctx.createGain();
+  master.gain.value = 0.9;
+
+  const comp = ctx.createDynamicsCompressor();
+  comp.threshold.value = -8;
+  comp.knee.value = 12;
+  comp.ratio.value = 8;
+  comp.attack.value = 0.003;
+  comp.release.value = 0.2;
+
+  master.connect(comp);
+  comp.connect(ctx.destination);
+
+  sound.build(ctx, master);
+  return await ctx.startRendering();
+}
+
+function bufferToWav(buffer) {
+  const numCh = buffer.numberOfChannels;
+  const len = buffer.length;
+  const sr = buffer.sampleRate;
+  const dataSize = len * numCh * 2;
+  const ab = new ArrayBuffer(44 + dataSize);
+  const dv = new DataView(ab);
+  let p = 0;
+
+  const ws = s => { for (let i = 0; i < s.length; i++) dv.setUint8(p++, s.charCodeAt(i)); };
+  const w32 = v => { dv.setUint32(p, v, true); p += 4; };
+  const w16 = v => { dv.setUint16(p, v, true); p += 2; };
+
+  ws('RIFF'); w32(36 + dataSize); ws('WAVE');
+  ws('fmt '); w32(16); w16(1); w16(numCh); w32(sr);
+  w32(sr * numCh * 2); w16(numCh * 2); w16(16);
+  ws('data'); w32(dataSize);
+
+  const chans = [];
+  for (let c = 0; c < numCh; c++) chans.push(buffer.getChannelData(c));
+
+  for (let i = 0; i < len; i++) {
+    for (let c = 0; c < numCh; c++) {
+      let s = Math.max(-1, Math.min(1, chans[c][i]));
+      dv.setInt16(p, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      p += 2;
+    }
+  }
+  return new Blob([ab], { type: 'audio/wav' });
+}
+
+/* ============================================================
+   ۴) موتور پخش و دانلود
+   ============================================================ */
+
+const buffers = new Map();   // id -> Promise<AudioBuffer>
+let liveCtx = null, masterGain = null;
+let currentSrc = null, currentId = null;
+
+function ac() {
+  if (!liveCtx) {
+    liveCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = liveCtx.createGain();
+    masterGain.gain.value = 0.8;
+    masterGain.connect(liveCtx.destination);
+  }
+  if (liveCtx.state === 'suspended') liveCtx.resume();
+  return liveCtx;
+}
+
+function getBuffer(sound) {
+  if (!buffers.has(sound.id)) {
+    const p = renderBuffer(sound).catch(err => { buffers.delete(sound.id); throw err; });
+    buffers.set(sound.id, p);
+  }
+  return buffers.get(sound.id);
+}
+
+function stopCurrent() {
+  if (currentSrc) {
+    try { currentSrc.onended = null; currentSrc.stop(); } catch (e) {}
+    currentSrc = null;
+  }
+  currentId = null;
+  updatePlayingUI();
+}
+
+async function playSound(sound) {
+  const ctx = ac();
+  if (currentId === sound.id) { stopCurrent(); return; }
+
+  stopCurrent();
+
+  const card = document.querySelector(`.card[data-id="${sound.id}"]`);
+  const btn = card ? card.querySelector('.play') : null;
+  if (btn && !buffers.has(sound.id)) btn.textContent = '⏳ ...';
+
+  try {
+    const buf = await getBuffer(sound);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(masterGain);
+    src.start();
+    currentSrc = src;
+    currentId = sound.id;
+    src.onended = () => {
+      if (currentSrc === src) { currentSrc = null; currentId = null; updatePlayingUI(); }
+    };
+    updatePlayingUI();
+  } catch (e) {
+    console.error(e);
+  } finally {
+    if (btn) btn.textContent = '▶ پخش';
+  }
+}
+
+function updatePlayingUI() {
+  document.querySelectorAll('.card').forEach(card => {
+    const on = card.dataset.id === currentId;
+    card.classList.toggle('playing', on);
+    const b = card.querySelector('.play');
+    if (b) b.textContent = on ? '⏸ توقف' : '▶ پخش';
+  });
+}
+
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 15000);
+}
+
+async function downloadSound(sound, btn) {
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '⏳';
+  try {
+    const buf = await getBuffer(sound);
+    triggerDownload(bufferToWav(buf), sound.id + '.wav');
+    btn.textContent = '✅';
+  } catch (e) {
+    console.error(e);
+    btn.textContent = '✕';
+  }
+  setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 850);
+}
+
+/* ============================================================
+   ۵) رابط کاربری
+   ============================================================ */
+
+const grid = document.getElementById('grid');
+const searchInput = document.getElementById('search');
+const catSelect = document.getElementById('cat');
+const volSlider = document.getElementById('vol');
+
+function makeCard(s) {
+  const el = document.createElement('div');
+  el.className = 'card';
+  el.dataset.id = s.id;
+  el.innerHTML = `
+    <span class="icon">${s.icon}</span>
+    <div class="name">${s.name}</div>
+    <div class="cat">${s.cat}</div>
+    <div class="actions">
+      <button class="btn play">▶ پخش</button>
+      <button class="btn dl" title="دانلود WAV">⬇</button>
+    </div>`;
+  el.querySelector('.play').addEventListener('click', () => playSound(s));
+  el.querySelector('.dl').addEventListener('click', e => downloadSound(s, e.currentTarget));
+  return el;
+}
+
+function render() {
+  const q = searchInput.value.trim().toLowerCase();
+  const cat = catSelect.value;
+
+  const list = SOUNDS.filter(s =>
+    (cat === 'all' || s.cat === cat) &&
+    (!q || s.name.toLowerCase().includes(q) || s.id.includes(q) || s.cat.includes(q))
+  );
+
+  grid.innerHTML = '';
+  if (!list.length) {
+    grid.innerHTML = '<div class="empty">چیزی پیدا نشد 🤷‍♂️</div>';
+    return;
+  }
+  const frag = document.createDocumentFragment();
+  list.forEach(s => frag.appendChild(makeCard(s)));
+  grid.appendChild(frag);
+  updatePlayingUI();
+}
+
+searchInput.addEventListener('input', render);
+catSelect.addEventListener('change', render);
+
+volSlider.addEventListener('input', () => {
+  const v = volSlider.value / 100;
+  if (masterGain) masterGain.gain.value = v;
+});
+
+document.getElementById('stopBtn').addEventListener('click', stopCurrent);
+
+document.getElementById('dlAll').addEventListener('click', async function () {
+  const btn = this;
+  btn.disabled = true;
+  const total = SOUNDS.length;
+  for (let i = 0; i < total; i++) {
+    btn.textContent = `⏳ ${i + 1}/${total}`;
+    try {
+      const buf = await getBuffer(SOUNDS[i]);
+      triggerDownload(bufferToWav(buf), SOUNDS[i].id + '.wav');
+      await new Promise(r => setTimeout(r, 280));
+    } catch (e) { console.error(e); }
+  }
+  btn.textContent = '✅ تمام شد';
+  setTimeout(() => { btn.textContent = '⬇ دانلود همه'; btn.disabled = false; }, 2500);
+});
+
+/* شمارنده فارسی */
+(function () {
+  const fa = '۰۱۲۳۴۵۶۷۸۹';
+  document.getElementById('count').textContent =
+    String(SOUNDS.length).replace(/\d/g, d => fa[+d]);
+})();
+
+render();
+</script>
+</body>
+</html>
